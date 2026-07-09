@@ -68,6 +68,10 @@ public class UserRepository {
     }
 
     public void delete(Long id) {
+        User user = users.get(id);
+        if (user == null) {
+            throw new NotFoundException("Пользователь не найден");
+        }
         users.remove(id);
     }
 }

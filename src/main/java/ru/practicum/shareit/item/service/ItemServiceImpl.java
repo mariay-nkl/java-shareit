@@ -1,6 +1,6 @@
 package ru.practicum.shareit.item.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -14,19 +14,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 
-    @Autowired
-    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository) {
-        this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
-    }
-
     @Override
     public ItemDto createItem(Long userId, ItemDto itemDto) {
-        validateItem(itemDto);
         User owner = userRepository.findById(userId);
 
         Item item = ItemMapper.toItem(itemDto);
@@ -56,12 +50,13 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId);
 
         if (!item.getOwner().getId().equals(userId)) {
-            throw new NotFoundException("Нельзя редактировать чужую вещь");
+            throw new NotFoundException("Редактирование доступно только владельцу");
         }
 
         itemDto.setId(itemId);
         Item updatedItem = ItemMapper.toItem(itemDto);
         updatedItem.setOwner(item.getOwner());
+        updatedItem.setRequest(item.getRequest());
 
         Item savedItem = itemRepository.update(updatedItem);
         return ItemMapper.toItemDto(savedItem);
@@ -72,17 +67,5 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.search(text).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
-    }
-
-    private void validateItem(ItemDto itemDto) {
-        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            throw new IllegalArgumentException("Название не может быть пустым");
-        }
-        if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            throw new IllegalArgumentException("Описание не может быть пустым");
-        }
-        if (itemDto.getAvailable() == null) {
-            throw new IllegalArgumentException("Статус доступности должен быть указан");
-        }
     }
 }
