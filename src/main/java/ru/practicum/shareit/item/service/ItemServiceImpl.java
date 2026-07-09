@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -20,10 +21,13 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
 
     @Override
-    public ItemDto createItem(Long userId, ItemDto itemDto) {
+    public ItemDto createItem(Long userId, ItemCreateDto itemCreateDto) {
         User owner = userRepository.findById(userId);
 
-        Item item = ItemMapper.toItem(itemDto);
+        Item item = new Item();
+        item.setName(itemCreateDto.getName());
+        item.setDescription(itemCreateDto.getDescription());
+        item.setAvailable(itemCreateDto.getAvailable());
         item.setOwner(owner);
 
         Item savedItem = itemRepository.save(item);
@@ -50,15 +54,20 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId);
 
         if (!item.getOwner().getId().equals(userId)) {
-            throw new NotFoundException("Редактирование доступно только владельцу");
+            throw new NotFoundException("Только владелец может редактировать вещь");
         }
 
-        itemDto.setId(itemId);
-        Item updatedItem = ItemMapper.toItem(itemDto);
-        updatedItem.setOwner(item.getOwner());
-        updatedItem.setRequest(item.getRequest());
+        if (itemDto.getName() != null) {
+            item.setName(itemDto.getName());
+        }
+        if (itemDto.getDescription() != null) {
+            item.setDescription(itemDto.getDescription());
+        }
+        if (itemDto.getAvailable() != null) {
+            item.setAvailable(itemDto.getAvailable());
+        }
 
-        Item savedItem = itemRepository.update(updatedItem);
+        Item savedItem = itemRepository.update(item);
         return ItemMapper.toItemDto(savedItem);
     }
 

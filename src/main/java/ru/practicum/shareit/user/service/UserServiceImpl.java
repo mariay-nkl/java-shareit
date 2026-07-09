@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -16,8 +17,10 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDto createUser(UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
+    public UserDto createUser(UserCreateDto userCreateDto) {
+        User user = new User();
+        user.setName(userCreateDto.getName());
+        user.setEmail(userCreateDto.getEmail());
         User savedUser = userRepository.save(user);
         return UserMapper.toUserDto(savedUser);
     }
@@ -37,9 +40,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(Long id, UserDto userDto) {
-        userDto.setId(id);
-        User user = UserMapper.toUser(userDto);
-        User updatedUser = userRepository.update(user);
+        User existingUser = userRepository.findById(id);
+
+        if (userDto.getName() != null) {
+            existingUser.setName(userDto.getName());
+        }
+        if (userDto.getEmail() != null) {
+            existingUser.setEmail(userDto.getEmail());
+        }
+
+        User updatedUser = userRepository.update(existingUser);
         return UserMapper.toUserDto(updatedUser);
     }
 
