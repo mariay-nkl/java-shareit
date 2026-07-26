@@ -5,6 +5,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,6 +58,14 @@ public class ErrorHandler {
     public Map<String, String> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
         Map<String, String> response = new HashMap<>();
         response.put("error", e.getBindingResult().getAllErrors().get(0).getDefaultMessage());
+        return response;
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Unknown state: " + e.getValue());
         return response;
     }
 }
