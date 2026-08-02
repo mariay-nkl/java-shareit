@@ -1,3 +1,5 @@
 #!/bin/bash
 set -e
-mvn clean package -DskipTests
+echo "Building and testing ShareIt project..."
+mvn clean package
+echo "Build completed successfully!"

@@ -1,3 +1,4 @@
+
 name: ShareIt API Tests
 
 on:
@@ -5,4 +6,29 @@ on:
 
 jobs:
   build:
-    uses: yandex-praktikum/java-shareit/.github/workflows/api-tests.yml@ci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+          
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+          
+      - name: Build and test with Maven
+        run: mvn clean package
+        
+      - name: Run Postman tests
+        uses: matt-ball/newman-action@master
+        with:
+          collection: https://raw.githubusercontent.com/yandex-praktikum/java-shareit/main/postman/sprint.json
+          environment: https://raw.githubusercontent.com/yandex-praktikum/java-shareit/main/postman/environment.json
+          reporters: cli
