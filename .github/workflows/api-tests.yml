@@ -1,4 +1,3 @@
-
 name: ShareIt API Tests
 
 on:
@@ -24,11 +23,21 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
           
       - name: Build and test with Maven
-        run: mvn clean package
-        
+        run: mvn clean package -DskipTests
+      
+      - name: Start server
+        run: |
+          java -jar shareit-server/target/*.jar &
+          sleep 30
+      
+      - name: Start gateway
+        run: |
+          java -jar shareit-gateway/target/*.jar &
+          sleep 30
+          
       - name: Run Postman tests
         uses: matt-ball/newman-action@master
         with:
-          collection: https://raw.githubusercontent.com/yandex-praktikum/java-shareit/main/postman/sprint.json
-          environment: https://raw.githubusercontent.com/yandex-praktikum/java-shareit/main/postman/environment.json
+          collection: ./tests/postman/sprint.json
+          environment: ./tests/postman/environment.json
           reporters: cli

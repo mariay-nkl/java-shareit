@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -38,6 +40,10 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDto createItem(Long userId, ItemCreateDto itemCreateDto) {
+        log.info("Creating item: userId={}, name={}, description={}, available={}, requestId={}",
+                userId, itemCreateDto.getName(), itemCreateDto.getDescription(),
+                itemCreateDto.getAvailable(), itemCreateDto.getRequestId());
+
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
@@ -54,11 +60,13 @@ public class ItemServiceImpl implements ItemService {
         item.setRequestId(itemCreateDto.getRequestId());
 
         Item savedItem = itemRepository.save(item);
+        log.info("Item created with id: {}", savedItem.getId());
         return ItemMapper.toItemDto(savedItem);
     }
 
     @Override
     public ItemDto getItem(Long id, Long userId) {
+        log.info("Getting item: id={}, userId={}", id, userId);
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
@@ -71,6 +79,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getItemsByOwner(Long userId) {
+        log.info("Getting items by owner: userId={}", userId);
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
@@ -89,6 +98,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) {
+        log.info("Updating item: userId={}, itemId={}", userId, itemId);
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
@@ -110,11 +120,13 @@ public class ItemServiceImpl implements ItemService {
         }
 
         Item savedItem = itemRepository.save(item);
+        log.info("Item updated: id={}", savedItem.getId());
         return ItemMapper.toItemDto(savedItem);
     }
 
     @Override
     public List<ItemDto> searchItems(String text) {
+        log.info("Searching items: text={}", text);
         if (text == null || text.isBlank()) {
             return List.of();
         }
@@ -127,6 +139,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public CommentDto addComment(Long userId, Long itemId, CommentCreateDto commentCreateDto) {
+        log.info("Adding comment: userId={}, itemId={}", userId, itemId);
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
@@ -147,6 +160,7 @@ public class ItemServiceImpl implements ItemService {
         comment.setCreated(LocalDateTime.now());
 
         Comment savedComment = commentRepository.save(comment);
+        log.info("Comment added: id={}", savedComment.getId());
         return CommentMapper.toCommentDto(savedComment);
     }
 
