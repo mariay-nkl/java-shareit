@@ -2,11 +2,15 @@ package ru.practicum.shareit.booking.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
+import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.constant.Headers;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/bookings")
@@ -40,6 +44,12 @@ public class BookingController {
     public ResponseEntity<Object> getUserBookings(
             @RequestHeader(Headers.USER_ID) Long userId,
             @RequestParam(value = "state", defaultValue = "ALL") String state) {
+        try {
+            BookingState.valueOf(state.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Unknown state: " + state));
+        }
         return client.get("/bookings?state=" + state, userId);
     }
 
@@ -47,6 +57,12 @@ public class BookingController {
     public ResponseEntity<Object> getOwnerBookings(
             @RequestHeader(Headers.USER_ID) Long userId,
             @RequestParam(value = "state", defaultValue = "ALL") String state) {
+        try {
+            BookingState.valueOf(state.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Unknown state: " + state));
+        }
         return client.get("/bookings/owner?state=" + state, userId);
     }
 }

@@ -8,7 +8,7 @@ import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.constant.Headers;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemUpdateDto;
 
 @RestController
 @RequestMapping("/items")
@@ -39,7 +39,7 @@ public class ItemController {
     public ResponseEntity<Object> updateItem(
             @RequestHeader(Headers.USER_ID) Long userId,
             @PathVariable("itemId") Long itemId,
-            @Valid @RequestBody ItemDto itemDto) {
+            @RequestBody ItemUpdateDto itemDto) {
         return client.patch("/items/" + itemId, itemDto, userId);
     }
 
