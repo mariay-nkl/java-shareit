@@ -1,0 +1,12 @@
+{
+  "id": "shareit-env",
+  "name": "ShareIt Environment",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "enabled": true,
+      "type": "text"
+    }
+  ]
+}
